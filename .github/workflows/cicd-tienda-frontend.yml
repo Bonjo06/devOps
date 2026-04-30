@@ -9,7 +9,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+    # Forzamos a que el contexto de ejecución sea la subcarpeta del frontend
     defaults:
       run:
         working-directory: ./frontend
@@ -27,24 +27,26 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
       - name: Login to ECR
-        id: login-ecr
+        id: login-ecr  # <-- CRÍTICO: Este ID permite que el siguiente paso obtenga la URL
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to Amazon ECR
         env:
+          # Referencia exacta al ID definido arriba
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: tienda-frontend
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          # Construimos usando el punto (.) para referirnos a la carpeta frontend establecida en 'defaults'
+          # Construcción con múltiples etiquetas profesionales
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
                        -t $ECR_REGISTRY/$ECR_REPOSITORY:run-${{ github.run_number }} \
                        -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           
+          # Subida de todas las etiquetas a ECR
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
 
       - name: Deploy to EC2 via SSM
-        
+        # Volvemos a la raíz para ejecutar el comando de AWS CLI
         working-directory: .
         run: |
           aws ssm send-command \
