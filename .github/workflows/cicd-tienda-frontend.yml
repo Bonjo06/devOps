@@ -3,6 +3,7 @@ name: CI/CD Tienda Frontend
 on:
   push:
     branches: [ "main" ]
+
     paths:
       - 'frontend/**'
 
@@ -27,35 +28,37 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
       - name: Login to ECR
+        
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to Amazon ECR
         env:
+          
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: tienda-frontend
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
                        -t $ECR_REGISTRY/$ECR_REPOSITORY:run-${{ github.run_number }} \
                        -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           
+          
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
 
-      - name: deploy to EC2
+      - name: Deploy to EC2 via SSM
+        
         working-directory: .
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: tienda-frontend
         run: |
           aws ssm send-command \
             --instance-ids ${{ secrets.EC2_FRONTEND_INSTANCE_ID }} \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[
-              \"aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY\",
-              \"docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest\",
-              \"docker stop tienda-frontend || true\",
-              \"docker rm tienda-frontend || true\",
-              \"docker run -d --name tienda-frontend -p 80:80 $ECR_REGISTRY/$ECR_REPOSITORY:latest\"
-            ]" \
+            --parameters 'commands=[
+              "aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}",
+              "docker pull ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest",
+              "docker stop tienda-frontend || true",
+              "docker rm tienda-frontend || true",
+              "docker run -d --name tienda-frontend -p 80:80 ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest"
+            ]' \
             --region ${{ secrets.AWS_REGION }}
