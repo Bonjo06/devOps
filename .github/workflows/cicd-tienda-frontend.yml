@@ -22,6 +22,7 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
       - name: Login to ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to Amazon ECR
@@ -31,8 +32,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-                      -t $ECR_REGISTRY/$ECR_REPOSITORY:run-${{ github.run_number }} \
-                      -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+                       -t $ECR_REGISTRY/$ECR_REPOSITORY:run-${{ github.run_number }} \
+                       -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
 
       - name: Deploy to EC2 via SSM
