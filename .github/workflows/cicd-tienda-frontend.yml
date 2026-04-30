@@ -35,17 +35,16 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         env:
-          # Referencia exacta al ID definido arriba
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          # Escribimos la URL directamente para que nunca llegue vacía
+          ECR_REGISTRY: 979842939605.dkr.ecr.us-east-1.amazonaws.com
           ECR_REPOSITORY: tienda-frontend
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          # Ahora $ECR_REGISTRY tendrá el valor real y el tag ya no empezará con "/"
+          # Ahora la construcción usará la URL fija y el formato será válido
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
                        -t $ECR_REGISTRY/$ECR_REPOSITORY:run-${{ github.run_number }} \
                        -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           
-          # Subimos todas las etiquetas profesionales a AWS ECR
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
 
       - name: Deploy to EC2 via SSM
