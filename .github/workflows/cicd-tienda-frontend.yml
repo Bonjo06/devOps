@@ -3,13 +3,15 @@ name: CI/CD Tienda Frontend
 on:
   push:
     branches: [ "main" ]
+    # Se activa solo si hay cambios dentro de la carpeta frontend
     paths:
       - 'frontend/**'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # Forzamos a que el contexto de ejecución sea la subcarpeta del frontend
+    # ESTO ES VITAL: Le dice a GitHub que todos los comandos 'run' 
+    # se ejecuten dentro de la subcarpeta 'frontend'
     defaults:
       run:
         working-directory: ./frontend
@@ -27,7 +29,8 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
       - name: Login to ECR
-        id: login-ecr  # <-- CRÍTICO: Este ID permite que el siguiente paso obtenga la URL
+        # ASIGNAR ESTE ID ES CRÍTICO para que el registro no llegue vacío
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to Amazon ECR
@@ -37,16 +40,16 @@ jobs:
           ECR_REPOSITORY: tienda-frontend
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          # Construcción con múltiples etiquetas profesionales
+          # Ahora $ECR_REGISTRY tendrá el valor real y el tag ya no empezará con "/"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
                        -t $ECR_REGISTRY/$ECR_REPOSITORY:run-${{ github.run_number }} \
                        -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           
-          # Subida de todas las etiquetas a ECR
+          # Subimos todas las etiquetas profesionales a AWS ECR
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
 
       - name: Deploy to EC2 via SSM
-        # Volvemos a la raíz para ejecutar el comando de AWS CLI
+        # Regresamos a la raíz del repo (.) para ejecutar el comando de AWS CLI
         working-directory: .
         run: |
           aws ssm send-command \
