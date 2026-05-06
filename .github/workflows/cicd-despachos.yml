@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./back-Despachos_SpringBoot/Springboot-API-REST
+        working-directory: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
     steps:
       - uses: actions/checkout@v4
       - name: Configure AWS
