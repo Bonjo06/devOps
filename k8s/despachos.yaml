@@ -30,6 +30,7 @@ metadata:
   name: despachos-service
   namespace: innovatech
 spec:
+  type: LoadBalancer
   selector:
     app: backend-despachos
   ports:

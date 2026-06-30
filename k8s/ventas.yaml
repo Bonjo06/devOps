@@ -30,6 +30,7 @@ metadata:
   name: ventas-service
   namespace: innovatech
 spec:
+  type: LoadBalancer
   selector:
     app: backend-ventas
   ports:
