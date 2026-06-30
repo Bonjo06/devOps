@@ -7,7 +7,7 @@ export const CardComponent = ({ title, description, buttonText, onClick }) => {
         <h5 className="mb-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-800">
           {title}
         </h5>
-      </a>
+      </a>  
       <p className="mb-5 font-normal text-gray-700 dark:text-gray-400">
         {description}
       </p>
