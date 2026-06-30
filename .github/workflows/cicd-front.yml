@@ -37,9 +37,11 @@ jobs:
           docker push $ECR_REPOSITORY_URI:latest
 
       - name: Configurar kubectl
+        working-directory: ${{ github.workspace }}
         run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name devopseks
       
       - name: Deploy a EKS
+        working-directory: ${{ github.workspace }}
         run: |
           kubectl apply -f k8s/namespace.yaml
           sed -i "s|image: .*|image: ${{ secrets.ECR_REPO_FRONT }}:latest|g" k8s/front.yaml

@@ -30,9 +30,11 @@ jobs:
           docker push ${{ secrets.ECR_REPO_BACK_DESPACHOS }}:latest
 
       - name: Configurar kubectl
+        working-directory: ${{ github.workspace }}
         run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name devopseks
       
       - name: Deploy a EKS
+        working-directory: ${{ github.workspace }}
         run: |
           kubectl apply -f k8s/namespace.yaml
           sed -i "s|image: .*|image: ${{ secrets.ECR_REPO_BACK_DESPACHOS }}:latest|g" k8s/despachos.yaml

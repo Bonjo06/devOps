@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@OpenAPIDefinition(  
+@OpenAPIDefinition(    
         info = @Info(
                 title = "API REST Ventas",
                 version = "1.0",
