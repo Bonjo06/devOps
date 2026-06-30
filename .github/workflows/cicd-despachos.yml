@@ -2,7 +2,7 @@ name: CI/CD Back Despachos
 on:
   push:
     paths:
-      - 'back-Despachos_SpringBoot/**' # Importante: coincide con tu carpeta
+      - 'back-Despachos_SpringBoot/**' 
 
 jobs:
   build-and-deploy:
@@ -29,16 +29,11 @@ jobs:
           docker build -t ${{ secrets.ECR_REPO_BACK_DESPACHOS }}:latest .
           docker push ${{ secrets.ECR_REPO_BACK_DESPACHOS }}:latest
 
-      - name: Deploy to EC2
+      - name: Configurar kubectl
+        run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name devopseks
+      
+      - name: Deploy a EKS
         run: |
-          aws ssm send-command \
-            --instance-ids ${{ secrets.EC2_BACKEND_INSTANCE_ID }} \
-            --document-name "AWS-RunShellScript" \
-            --parameters 'commands=[
-              "aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REPO_BACK_DESPACHOS }}",
-              "docker pull ${{ secrets.ECR_REPO_BACK_DESPACHOS }}:latest",
-              "docker stop back-despachos || true",
-              "docker rm back-despachos || true",
-              "docker run -d --name back-despachos -p 8080:8080 ${{ secrets.ECR_REPO_BACK_DESPACHOS }}:latest"
-            ]' \
-            --region ${{ secrets.AWS_REGION }}
+          kubectl apply -f k8s/namespace.yaml
+          sed -i "s|image: .*|image: ${{ secrets.ECR_REPO_BACK_DESPACHOS }}:latest|g" k8s/despachos.yaml
+          kubectl apply -f k8s/despachos.yaml
