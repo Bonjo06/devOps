@@ -21,6 +21,8 @@ spec:
           value: "mysql-service" # Este es el nombre del servicio que creamos arriba
         - name: DB_PORT
           value: "3306"
+        - name: DB_NAME
+          value: "tienda_db"
         - name: DB_USERNAME
           value: "root"
         - name: DB_PASSWORD

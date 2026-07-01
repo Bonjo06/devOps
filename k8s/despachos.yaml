@@ -21,12 +21,14 @@ spec:
           value: "mysql-service" # Este es el nombre del servicio que creamos arriba
         - name: DB_PORT
           value: "3306"
+        - name: DB_NAME
+          value: "tienda_db"
         - name: DB_USERNAME
           value: "root"
         - name: DB_PASSWORD
           value: "password123"
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
         resources:
           requests:
             cpu: "100m"
@@ -45,7 +47,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
+      targetPort: 8081
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
