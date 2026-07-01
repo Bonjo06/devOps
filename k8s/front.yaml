@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ECR_REPO_FRONTEND_PLACEHOLDER
+        image: 725770588296.dkr.ecr.us-east-1.amazonaws.com/front-despacho:latest
         ports:
         - containerPort: 80
         resources:

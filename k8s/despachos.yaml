@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: despachos
-        image: ECR_REPO_BACK_DESPACHOS_PLACEHOLDER
+        image: 725770588296.dkr.ecr.us-east-1.amazonaws.com/api-despachos:latest
         env:
         - name: DB_ENDPOINT
           value: "mysql-service" # Este es el nombre del servicio que creamos arriba

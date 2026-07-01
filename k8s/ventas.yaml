@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: ventas
-        image: ECR_REPO_BACK_VENTAS_PLACEHOLDER
+        image: 725770588296.dkr.ecr.us-east-1.amazonaws.com/api-ventas:latest
         env:
         - name: DB_ENDPOINT
           value: "mysql-service" # Este es el nombre del servicio que creamos arriba

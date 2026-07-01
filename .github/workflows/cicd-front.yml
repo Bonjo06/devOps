@@ -33,7 +33,10 @@ jobs:
         env:
           ECR_REPOSITORY_URI: ${{ secrets.ECR_REPO_FRONT }}
         run: |
-          docker build -t $ECR_REPOSITORY_URI:latest .
+          docker build \
+            --build-arg VITE_VENTAS_API_URL=${{ secrets.VITE_VENTAS_API_URL }} \
+            --build-arg VITE_DESPACHOS_API_URL=${{ secrets.VITE_DESPACHOS_API_URL }} \
+            -t $ECR_REPOSITORY_URI:latest .
           docker push $ECR_REPOSITORY_URI:latest
 
       - name: Configurar kubectl
