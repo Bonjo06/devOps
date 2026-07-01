@@ -16,6 +16,15 @@ spec:
       containers:
       - name: despachos
         image: ECR_REPO_BACK_DESPACHOS_PLACEHOLDER
+        env:
+        - name: DB_ENDPOINT
+          value: "mysql-service" # Este es el nombre del servicio que creamos arriba
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USERNAME
+          value: "root"
+        - name: DB_PASSWORD
+          value: "password123"
         ports:
         - containerPort: 8080
         resources:
