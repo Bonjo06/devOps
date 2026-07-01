@@ -12,7 +12,7 @@ export const FormCierreDespacho = ({ despacho, onClose }) => {
       despachado: data.despachado,
     };
 
-    console.log("Datos del formulario:", jsonData);
+    console.log("Datos del formulario:", jsonData);  
 
     try {
       await axios.put(
