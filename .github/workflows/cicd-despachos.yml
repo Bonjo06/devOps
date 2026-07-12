@@ -1,6 +1,7 @@
 name: CI/CD Back Despachos
 on:
   push:
+    branches: [ "deploy" ]
     paths:
       - 'back-Despachos_SpringBoot/**'
 
