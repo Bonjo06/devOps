@@ -70,7 +70,7 @@ export const FormCierreDespacho = ({ despacho, onClose }) => {
           <label className="block font-bold mb-2">Patente Camión</label>
           <input
             type="text"
-            disabled={true}
+            disabled={true}  
             value={despacho.patenteCamion}
             className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
           />
