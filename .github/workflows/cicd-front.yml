@@ -4,14 +4,11 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'front_despacho/**' 
+      - 'front_despacho/**'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./front_despacho 
 
     steps:
       - name: Checkout Repo
@@ -30,22 +27,23 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build and Push to ECR
+        working-directory: ./front_despacho
         env:
           ECR_REPOSITORY_URI: ${{ secrets.ECR_REPO_FRONT }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build \
-            --build-arg VITE_VENTAS_API_URL=${{ secrets.VITE_VENTAS_API_URL }} \
-            --build-arg VITE_DESPACHOS_API_URL=${{ secrets.VITE_DESPACHOS_API_URL }} \
-            -t $ECR_REPOSITORY_URI:latest .
+          docker build -t $ECR_REPOSITORY_URI:$IMAGE_TAG -t $ECR_REPOSITORY_URI:latest .
+          docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
           docker push $ECR_REPOSITORY_URI:latest
 
-      - name: Configurar kubectl
-        working-directory: ${{ github.workspace }}
+      - name: Update kubeconfig
         run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name devopseks
-      
-      - name: Deploy a EKS
-        working-directory: ${{ github.workspace }}
+
+      - name: Deploy to EKS
+        env:
+          ECR_REPOSITORY_URI: ${{ secrets.ECR_REPO_FRONT }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          kubectl apply -f k8s/namespace.yaml
-          sed -i "s|image: .*|image: ${{ secrets.ECR_REPO_FRONT }}:latest|g" k8s/front.yaml
+          sed -i "s|ECR_REPO_FRONTEND_PLACEHOLDER|$ECR_REPOSITORY_URI:$IMAGE_TAG|g" k8s/front.yaml
           kubectl apply -f k8s/front.yaml
+          kubectl rollout status deployment/frontend -n innovatech --timeout=120s

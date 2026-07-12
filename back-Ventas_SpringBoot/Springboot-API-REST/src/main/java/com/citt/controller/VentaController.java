@@ -21,7 +21,7 @@ import java.util.List;
 public class VentaController {
 
     @Autowired
-    private VentaService ventaService;
+    private VentaService ventaService;  
 
     @Operation(summary = "Crear una nueva venta", description = "Crea una nueva venta en el sistema")
     @PostMapping

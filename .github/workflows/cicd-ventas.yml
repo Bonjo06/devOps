@@ -2,7 +2,7 @@ name: CI/CD Back Ventas
 on:
   push:
     paths:
-      - 'back-Ventas_SpringBoot/**' 
+      - 'back-Ventas_SpringBoot/**'
 
 jobs:
   build-and-deploy:
@@ -12,7 +12,16 @@ jobs:
         working-directory: ./back-Ventas_SpringBoot/Springboot-API-REST
     steps:
       - uses: actions/checkout@v4
-      
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run tests
+        run: mvn test
+
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -20,23 +29,29 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ secrets.AWS_REGION }}
-      
+
       - name: Login to ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build and Push
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t ${{ secrets.ECR_REPO_BACK_VENTAS }}:latest .
+          docker build -t ${{ secrets.ECR_REPO_BACK_VENTAS }}:$IMAGE_TAG -t ${{ secrets.ECR_REPO_BACK_VENTAS }}:latest .
+          docker push ${{ secrets.ECR_REPO_BACK_VENTAS }}:$IMAGE_TAG
           docker push ${{ secrets.ECR_REPO_BACK_VENTAS }}:latest
 
       - name: Configurar kubectl
         working-directory: ${{ github.workspace }}
         run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name devopseks
-      
+
       - name: Deploy a EKS
         working-directory: ${{ github.workspace }}
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           kubectl apply -f k8s/namespace.yaml
-          sed -i "s|image: .*|image: ${{ secrets.ECR_REPO_BACK_VENTAS }}:latest|g" k8s/ventas.yaml
+          sed -i "s|image: .*|image: ${{ secrets.ECR_REPO_BACK_VENTAS }}:$IMAGE_TAG|g" k8s/ventas.yaml
           kubectl apply -f k8s/ventas.yaml
+          kubectl rollout status deployment/backend-ventas -n innovatech --timeout=120s

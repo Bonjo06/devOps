@@ -1,9 +1,21 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-credentials
+  namespace: innovatech
+type: Opaque
+stringData:
+  DB_USERNAME: "root"
+  DB_PASSWORD: "tiendaperritos123!"
+  DB_NAME: "tienda_db"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql-db
   namespace: innovatech
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: mysql
@@ -17,9 +29,15 @@ spec:
         image: mysql:8.0
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: "password123"
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: DB_PASSWORD
         - name: MYSQL_DATABASE
-          value: "tienda_db"
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: DB_NAME
         ports:
         - containerPort: 3306
 ---

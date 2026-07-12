@@ -15,25 +15,48 @@ spec:
     spec:
       containers:
       - name: despachos
-        image: 725770588296.dkr.ecr.us-east-1.amazonaws.com/api-despachos:latest
+        image: ECR_REPO_BACK_DESPACHOS_PLACEHOLDER
         env:
         - name: DB_ENDPOINT
-          value: "mysql-service" # Este es el nombre del servicio que creamos arriba
+          value: "mysql-service"
         - name: DB_PORT
           value: "3306"
         - name: DB_NAME
-          value: "tienda_db"
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: DB_NAME
         - name: DB_USERNAME
-          value: "root"
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: DB_USERNAME
         - name: DB_PASSWORD
-          value: "password123"
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: DB_PASSWORD
         ports:
         - containerPort: 8081
         resources:
           requests:
-            cpu: "100m"
-          limits:
             cpu: "250m"
+            memory: "384Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        readinessProbe:
+          httpGet:
+            path: /api/v1/despachos
+            port: 8081
+          initialDelaySeconds: 25
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/v1/despachos
+            port: 8081
+          initialDelaySeconds: 40
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
@@ -41,7 +64,7 @@ metadata:
   name: despachos-service
   namespace: innovatech
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: backend-despachos
   ports:
@@ -62,9 +85,9 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 50
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50

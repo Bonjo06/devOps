@@ -1,0 +1,19 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: devopseks
+  region: us-east-1
+  version: "1.30"
+
+iam:
+  serviceRoleARN: arn:aws:iam::462663493212:role/LabRole
+
+managedNodeGroups:
+  - name: innovatech-nodes
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 4
+    iam:
+      instanceRoleARN: arn:aws:iam::462663493212:role/LabRole
