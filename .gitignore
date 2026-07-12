@@ -1,3 +1,3 @@
 # Secrets locales
 k8s/db-secret.yaml
-
+.env

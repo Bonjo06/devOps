@@ -16,6 +16,13 @@ spec:
       containers:
       - name: frontend
         image: ECR_REPO_FRONTEND_PLACEHOLDER
+        env:
+        - name: DNS_RESOLVER
+          value: "kube-dns.kube-system.svc.cluster.local"
+        - name: VENTAS_UPSTREAM
+          value: "ventas-service.innovatech.svc.cluster.local:80"
+        - name: DESPACHOS_UPSTREAM
+          value: "despachos-service.innovatech.svc.cluster.local:80"
         ports:
         - containerPort: 80
         resources:
