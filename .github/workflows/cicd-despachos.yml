@@ -20,7 +20,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Run tests
-        run: mvn test
+        run: mvn test -Dspring.profiles.active=test
 
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
